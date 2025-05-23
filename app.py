@@ -99,14 +99,14 @@ header_col1, header_col2 = st.columns([1, 1])
 with header_col1:
     st.markdown(
         """
-        <h3 style='text-align: left; color: #666;'>Aplikasi ini digunakan untuk menganalisis data spareparts dan tools.</h3>
+        <h5 style='text-align: left; color: #666;'>Aplikasi ini digunakan untuk menganalisis data spareparts dan tools.</h5>
         """,
         unsafe_allow_html=True
     )
 with header_col2:
     st.markdown(
         """
-        <h3 style='text-align: left; color: #666;'>Silakan unggah file Excel (.xlsx / .xlsm) untuk memulai analisis.</h3>
+        <h5 style='text-align: left; color: #666;'>Silakan unggah file Excel (.xlsx / .xlsm) </h5>
         """,
         unsafe_allow_html=True
     )
@@ -123,7 +123,7 @@ if uploaded_file:
         df.columns = df.columns.str.replace(r'\s+', ' ', regex=True).str.strip()
 
         # Tampilkan data original dalam expander (cascade style)
-        with st.expander("📄 Lihat Data Asli (Kolom B–K dari Sheet 'USAGE')"):
+        with st.expander("📄 Lihat Data Asli"): #(Kolom B–K dari Sheet 'USAGE')
             st.dataframe(df, use_container_width=True)
 
 
