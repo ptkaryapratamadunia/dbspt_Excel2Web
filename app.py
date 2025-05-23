@@ -8,7 +8,7 @@ from io import BytesIO
 import base64
 import os
 
-#STart to commit 23May2025
+#STart to commit 23May2025 to GitHub
 # ---- PAGE CONFIGURATION ----
 
 st.set_page_config(page_title="Excel USAGE Filter", layout="wide")
@@ -34,8 +34,8 @@ kiri, kanan = st.columns([3, 2])
 with kiri:
     st.markdown(
         """
-        <h3 style='text-align: left; color: #333;'> 📊 Spareparts & Tools Summary Report</h1>
-        <h5 style='text-align: left; color: #666;'>by e-WeYe</h2>
+        <h3 style='text-align: left; color: #333;'> 📊 dbSPT Dashboard</h1>
+        <h5 style='text-align: left; color: #666;'>Spareparts & Tools Summary Report</h2>
         """,
         unsafe_allow_html=True
     )
@@ -95,10 +95,24 @@ with kanan: # Menampilkan logo di kolom kanan
 
     
 # ---- APP DESCRIPTION ----
-st.write("Upload file Excel (.xlsx / .xlsm) untuk menganalisis data spareparts dan tools.")
-st.write("Hasil analisis akan ditampilkan dalam bentuk tabel dan grafik interaktif.")
+header_col1, header_col2 = st.columns([1, 1])
+with header_col1:
+    st.markdown(
+        """
+        <h3 style='text-align: left; color: #666;'>Aplikasi ini digunakan untuk menganalisis data spareparts dan tools.</h3>
+        """,
+        unsafe_allow_html=True
+    )
+with header_col2:
+    st.markdown(
+        """
+        <h3 style='text-align: left; color: #666;'>Silakan unggah file Excel (.xlsx / .xlsm) untuk memulai analisis.</h3>
+        """,
+        unsafe_allow_html=True
+    )
 
-uploaded_file = st.file_uploader("Unggah file Excel", type=["xlsx", "xlsm"])
+
+    uploaded_file = st.file_uploader("Unggah file Excel", type=["xlsx", "xlsm"])
 
 if uploaded_file:
     try:
