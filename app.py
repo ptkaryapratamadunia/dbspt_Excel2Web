@@ -11,7 +11,7 @@ import os
 #STart to commit 23May2025 to GitHub
 # ---- PAGE CONFIGURATION ----
 
-st.set_page_config(page_title="Excel USAGE Filter", layout="wide")
+st.set_page_config(page_title="sbSPT Dashboard", layout="wide")
 
 # ---- HIDE STREAMLIT STYLE ----
 hide_st_style = """
