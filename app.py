@@ -14,19 +14,50 @@ import os
 st.set_page_config(page_title="dbSPT Dashboard", layout="wide")
 
 # ---- HIDE STREAMLIT STYLE ----
-# hide_st_style = """
-# <style>
-# #MainMenu {visibility: hidden;}
-# footer {visibility: hidden;}
-# header {visibility: hidden;}
-# </style>
-# """
-# st.markdown(hide_st_style, unsafe_allow_html=True)
+hide_st_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_st_style, unsafe_allow_html=True)
 
 # Fungsi untuk mengubah gambar menjadi base64
 def get_image_as_base64(image_path):
 	with open(image_path, "rb") as img_file:
 		return base64.b64encode(img_file.read()).decode()
+     
+def show_footer():
+
+	
+	#Footer diisi foto ditaruh ditengah
+	st.markdown("---")
+
+
+	kaki_kiri,kaki_kiri2, kaki_tengah,kaki_kanan2, kaki_kanan=st.columns((2,2,1,2,2))
+
+	with kaki_kiri:
+		st.write("")
+
+	with kaki_kiri2:
+		st.write("")
+
+	with kaki_tengah:
+		# kontener_photo=st.container(border=True)
+		# Adjust the file path based on the current directory
+		current_dir = os.path.dirname(os.path.abspath(__file__))
+		e_WeYe = os.path.join(current_dir, 'eweye.png')
+		# Memuat gambar dan mengubahnya menjadi base64
+		# logo_KPD ='logoKPD.png'
+		image_base64 = get_image_as_base64(e_WeYe)
+		st.image(e_WeYe,"©️ 2024 - e-WeYe, All Rights Reserved")
+
+	with kaki_kanan2:
+		st.write("")
+
+	with kaki_kanan:
+		st.write("")
 
 # ---- APP TITLE ----
 
@@ -115,7 +146,7 @@ with header_col2:
     )
 
 
-    uploaded_file = st.file_uploader("Klik Browser untuk mengunggah file", type=["xlsx", "xlsm"])
+    uploaded_file = st.file_uploader("Klik tombol 'Browse files' untuk mengunggah file", type=["xlsx", "xlsm"])
 
 if uploaded_file:
     try:
@@ -464,3 +495,5 @@ if uploaded_file:
         st.error("❌ Sheet 'USAGE' tidak ditemukan.")
     except Exception as e:
         st.error(f"⚠️ Gagal membaca file: {e}")
+
+    show_footer()  # Menampilkan footer dengan gambar dan teks
