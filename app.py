@@ -140,7 +140,7 @@ if uploaded_file:
         df['Bulan-Tahun'] = df['Date'].dt.strftime('%B %Y')
 
         # Urutkan Bulan-Tahun berdasarkan tanggal termuda ke tertua
-        bulan_tahun_order = df.sort_values('Date')['Bulan-Tahun'].drop_duplicates().tolist()
+        bulan_tahun_order = df.sort_values('Date',ascending=False)['Bulan-Tahun'].drop_duplicates().tolist()
         bulan_tahun_options = bulan_tahun_order
         # bulan_tahun_options = sorted(df['Bulan-Tahun'].unique())
 
