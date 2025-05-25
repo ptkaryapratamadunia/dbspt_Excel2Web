@@ -100,9 +100,12 @@ with header_col1:
     st.markdown(
         """
         <h5 style='text-align: left; color: #666;'>Aplikasi ini digunakan untuk menganalisis data spareparts dan tools. Data bersumber dari File Excel yang diinput secara rutin oleh team produksi Stamping Line PT. KARYAPRATAMA DUNIA</h5>
-        """,
-        unsafe_allow_html=True
-    )
+       
+        <div style='padding:1rem; border:1px solid #ddd; border-radius:1rem; text-align:center;'>
+                <div style='font-size:0.9rem; color:gray;'>Disclaimer: [IDR]</div>
+                <div style='font-size:1.8rem; font-weight:bold;'>Sumber data excel hanya bisa diuload dari Aplikasi dbSPT.xlsm yang ada di PT. KARYAPRATAMA DUNIA</div>
+            """, unsafe_allow_html=True)
+    
 with header_col2:
     st.markdown(
         """
@@ -142,7 +145,7 @@ if uploaded_file:
         # Urutkan Bulan-Tahun berdasarkan tanggal termuda ke tertua
         bulan_tahun_order = df.sort_values('Date',ascending=False)['Bulan-Tahun'].drop_duplicates().tolist()
         bulan_tahun_options = bulan_tahun_order
-        # bulan_tahun_options = sorted(df['Bulan-Tahun'].unique())
+       
 
         #hilangkan whitespace di depan dan belakang pada kolom PIC
         df['PIC'] = df['PIC'].str.strip()
@@ -158,8 +161,6 @@ if uploaded_file:
         filtered_df = df[df['Bulan-Tahun'].isin(selected_bt)]
 
         st.success(f"Menampilkan {len(filtered_df)} baris untuk bulan-tahun: {', '.join(selected_bt)}")
-
-             
 
         # Download hasil filter
         def convert_df_to_excel(dataframe):
