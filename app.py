@@ -109,13 +109,13 @@ with header_col1:
 with header_col2:
     st.markdown(
         """
-        <h5 style='text-align: left; color: #666;'>Silahkan unggah file Excel (.xlsx / .xlsm) </h5>
+        <h5 style='font-size:0.9rem;text-align: left; color: #666;'>Silahkan unggah file Excel (.xlsx / .xlsm) </h5>
         """,
         unsafe_allow_html=True
     )
 
 
-    uploaded_file = st.file_uploader("Unggah file Excel", type=["xlsx", "xlsm"])
+    uploaded_file = st.file_uploader("Klik Browser untuk mengunggah file", type=["xlsx", "xlsm"])
 
 if uploaded_file:
     try:
