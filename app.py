@@ -11,17 +11,17 @@ import os
 #STart to commit 23May2025 to GitHub
 # ---- PAGE CONFIGURATION ----
 
-st.set_page_config(page_title="sbSPT Dashboard", layout="wide")
+st.set_page_config(page_title="dbSPT Dashboard", layout="wide")
 
 # ---- HIDE STREAMLIT STYLE ----
-hide_st_style = """
-<style>
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-header {visibility: hidden;}
-</style>
-"""
-st.markdown(hide_st_style, unsafe_allow_html=True)
+# hide_st_style = """
+# <style>
+# #MainMenu {visibility: hidden;}
+# footer {visibility: hidden;}
+# header {visibility: hidden;}
+# </style>
+# """
+# st.markdown(hide_st_style, unsafe_allow_html=True)
 
 # Fungsi untuk mengubah gambar menjadi base64
 def get_image_as_base64(image_path):
@@ -99,7 +99,7 @@ header_col1, header_col2 = st.columns([1, 1])
 with header_col1:
     st.markdown(
         """
-        <h5 style='text-align: left; color: #666;'>Aplikasi ini digunakan untuk menganalisis data spareparts dan tools.</h5>
+        <h5 style='text-align: left; color: #666;'>Aplikasi ini digunakan untuk menganalisis data spareparts dan tools. Data bersumber dari File Excel yang diinput secara rutin oleh team produksi Stamping Line PT. KARYAPRATAMA DUNIA</h5>
         """,
         unsafe_allow_html=True
     )
@@ -147,7 +147,7 @@ if uploaded_file:
         df['PIC'] = df['PIC'].str.upper()
 
         # st.divider()
-        st.subheader("📅 Filter Data berdasarkan Bulan-Tahun")
+        st.write("📅 Filter Data berdasarkan Bulan-Tahun")
         selected_bt = st.multiselect("Pilih satu atau beberapa Bulan-Tahun", bulan_tahun_options, default=bulan_tahun_options[:1])
 
         # Filter DataFrame
@@ -155,9 +155,7 @@ if uploaded_file:
 
         st.success(f"Menampilkan {len(filtered_df)} baris untuk bulan-tahun: {', '.join(selected_bt)}")
 
-        with st.expander("📄 Tampilkan Data Filtered"):
-            st.dataframe(filtered_df.drop(columns=['Bulan-Tahun']), use_container_width=True)
-
+             
 
         # Download hasil filter
         def convert_df_to_excel(dataframe):
@@ -173,15 +171,25 @@ if uploaded_file:
             joined = "_".join(bt.replace(" ", "_") for bt in selected_bt)
             file_name = f"USAGE_{joined}.xlsx"
 
-        kol1, kol2, kol3    = st.columns(3)
-        # Tampilkan total Qty dan Amount
-        with kol1:
+
+        emma_L, emma_R = st.columns([1, 1])
+        with emma_L:
+            with st.expander("📄 Tampilkan Data Hasil Filtering"):
+                st.dataframe(filtered_df.drop(columns=['Bulan-Tahun']), use_container_width=True)
+        with emma_R:
             st.download_button(
                 label="📥 Download Hasil Filter",
                 data=excel_data,
                 file_name=file_name,
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+        st.markdown("---")
+        
+        kol1, kol2, kol3    = st.columns(3)
+        # Tampilkan total Qty dan Amount
+        with kol1:
+            st.subheader("📈 SUMMARY DATA")
+        
         with kol2:
             total_amount = filtered_df['Total Amount'].sum()
             total_amount_str = f"{total_amount:,.0f}"
@@ -203,7 +211,7 @@ if uploaded_file:
 
         # Visualisasi data
 
-        st.subheader("📈 Visualisasi Data")
+        st.write("📈 Visualisasi Data")
         st.write("Grafik interaktif untuk analisis data spareparts dan tools.")
 
 #region Adaptasi Date
