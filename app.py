@@ -99,11 +99,11 @@ header_col1, header_col2 = st.columns([1, 1])
 with header_col1:
     st.markdown(
         """
-        <h5 style='text-align: left; color: #666;'>Aplikasi ini digunakan untuk menganalisis data spareparts dan tools. Data bersumber dari File Excel yang diinput secara rutin oleh team produksi Stamping Line PT. KARYAPRATAMA DUNIA</h5>
+        <h5 style='font-size:0.9rem;text-align: left; color: #666;'>Aplikasi ini digunakan untuk menganalisis data spareparts dan tools. Data bersumber dari File Excel yang diinput secara rutin oleh team produksi Stamping Line PT. KARYAPRATAMA DUNIA</h5>
        
         <div style='padding:1rem; border:1px solid #ddd; border-radius:1rem; text-align:center;'>
-                <div style='font-size:0.9rem; color:gray;'>Disclaimer: </div>
-                <div style='font-size:0.8rem; font-weight:bold;'>Sumber data excel hanya bisa diuload dari Aplikasi dbSPT.xlsm yang ada di PT. KARYAPRATAMA DUNIA</div>
+                <div style='font-size:0.9rem; color:brown; font-weight:bold'>Disclaimer: </div>
+                <div style='font-size:0.8rem; color:gray;'>Sumber data excel hanya bisa diuload dari Aplikasi dbSPT.xlsm yang ada di PT. KARYAPRATAMA DUNIA</div>
             """, unsafe_allow_html=True)
     
 with header_col2:
