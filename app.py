@@ -106,7 +106,7 @@ with header_col1:
 with header_col2:
     st.markdown(
         """
-        <h5 style='text-align: left; color: #666;'>Silakan unggah file Excel (.xlsx / .xlsm) </h5>
+        <h5 style='text-align: left; color: #666;'>Silahkan unggah file Excel (.xlsx / .xlsm) </h5>
         """,
         unsafe_allow_html=True
     )
@@ -138,7 +138,11 @@ if uploaded_file:
 
         # Buat kolom Bulan-Tahun
         df['Bulan-Tahun'] = df['Date'].dt.strftime('%B %Y')
-        bulan_tahun_options = sorted(df['Bulan-Tahun'].unique())
+
+        # Urutkan Bulan-Tahun berdasarkan tanggal termuda ke tertua
+        bulan_tahun_order = df.sort_values('Date')['Bulan-Tahun'].drop_duplicates().tolist()
+        bulan_tahun_options = bulan_tahun_order
+        # bulan_tahun_options = sorted(df['Bulan-Tahun'].unique())
 
         #hilangkan whitespace di depan dan belakang pada kolom PIC
         df['PIC'] = df['PIC'].str.strip()
@@ -184,7 +188,7 @@ if uploaded_file:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
         st.markdown("---")
-        
+
         kol1, kol2, kol3    = st.columns(3)
         # Tampilkan total Qty dan Amount
         with kol1:
