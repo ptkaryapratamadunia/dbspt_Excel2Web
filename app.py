@@ -736,6 +736,27 @@ if uploaded_file:
 
 #endregion Grafik Line Harian by M/C No.
 
+#region Pivot Table
+        # Buat pivot table dengan kolom: Part No., Spareparts/ Tools Name, M/C No., PIC, Qty (pcs), Total Amount (IDR)
+        pivot_table = (
+            filtered_df.groupby(['Part No.', 'Spareparts/ Tools Name', 'M/C No.', 'PIC'], as_index=False)
+            .agg({'Qty': 'sum', 'Total Amount': 'sum'})
+            .rename(columns={
+            'Qty': 'Qty (pcs)',
+            'Total Amount': 'Total Amount (IDR)'
+            })
+        )
+
+        # Urutkan berdasarkan Total Amount (IDR) terbesar
+        pivot_table = pivot_table.sort_values('Total Amount (IDR)', ascending=False)
+
+        # Tampilkan pivot table di Streamlit
+        with st.expander("📊 Pivot Table: Part No., Spareparts/ Tools Name, M/C No., PIC, Qty (pcs), Total Amount (IDR)"):
+            st.dataframe(pivot_table, use_container_width=True)
+#endregion Pivot Table
+
+
+
     except ValueError:
         st.error("❌ Sheet 'USAGE' tidak ditemukan.")
     except Exception as e:
