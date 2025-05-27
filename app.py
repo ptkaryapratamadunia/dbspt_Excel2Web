@@ -139,7 +139,7 @@ with header_col1:#about this app
 with header_col2:#link G-Drive
                   
             #Added 18Mar2025 to make this apps more user friendly and globally accessible
-			st.warning(f"Jika sumber file yang ingin dibersihkan berada di folder Google Drive, unduh/download lewat link berikut ini: [Link Folder](https://drive.google.com/drive/folders/1LCTVG_9ZZY_GUBtOM0Ycb-dWTgidA2_3?usp=sharing)  |  Download file Excel (.xls, .xlsx atau .csv) dari folder tersebut ke perangkat Anda, lalu unggah/upload file lewat menu Browse di sebelah kanan ➡️:")
+			st.warning(f"Jika Anda belum memiliki file, silakan unduh dari 📂 [Link Folder ini](https://drive.google.com/drive/folders/1LCTVG_9ZZY_GUBtOM0Ycb-dWTgidA2_3?usp=sharing), lalu unggah/upload file lewat menu Browse Files di sebelah kanan ➡️:")
                   
 with header_col3:#file uploader
     st.markdown(
@@ -152,6 +152,9 @@ with header_col3:#file uploader
 
     uploaded_file = st.file_uploader("Klik tombol 'Browse files' untuk mengunggah file", type=["xlsx", "xlsm"])
 
+st.markdown("---")
+
+# ---- MAIN APP LOGIC ----
 if uploaded_file:
     try:
         # Baca sheet "USAGE" dan kolom B:K
@@ -675,3 +678,8 @@ if uploaded_file:
         st.error(f"⚠️ Gagal membaca file: {e}")
 
     show_footer()  # Menampilkan footer dengan gambar dan teks
+
+else:
+    
+    st.info("Menunggu File diunggah...")
+    
