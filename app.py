@@ -15,14 +15,14 @@ import re
 st.set_page_config(page_title="dbSPT Dashboard", layout="wide")
 
 # ---- HIDE STREAMLIT STYLE ----
-# hide_st_style = """
-# <style>
-# #MainMenu {visibility: hidden;}
-# footer {visibility: hidden;}
-# header {visibility: hidden;}
-# </style>
-# """
-# st.markdown(hide_st_style, unsafe_allow_html=True)
+hide_st_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_st_style, unsafe_allow_html=True)
 
 # Fungsi untuk mengubah gambar menjadi base64
 def get_image_as_base64(image_path):
@@ -595,55 +595,52 @@ if uploaded_file:
 
 #region Grafik Line Harian by M/C No.
         
-        # Buat chart fig1
-        # Filter data berdasarkan bulan-tahun
-        if selected_bt:
-            selected_date = pd.to_datetime(selected_bt[0], format='%B %Y')
-            start_date = selected_date.replace(day=1)
-            end_date = start_date + pd.offsets.MonthEnd(1)
+        # Grafik Line Harian by M/C No. dengan sumbu X menampilkan semua tanggal dalam rentang filtered_df
 
-            # Buat rentang tanggal harian
-            daily_range = pd.date_range(start=start_date, end=end_date)
+        if not filtered_df.empty:
+            # Tentukan rentang tanggal dari data yang sudah difilter
+            min_date = filtered_df['Date'].min().normalize()
+            max_date = filtered_df['Date'].max().normalize()
+            daily_range = pd.date_range(start=min_date, end=max_date, freq='D')
 
-            # Ambil data tanggal dalam rentang ini
-            filtered_dates = filtered_df[
-                (filtered_df['Date'] >= start_date) &
-                (filtered_df['Date'] <= end_date)
-            ]
-
-            # Ambil semua kombinasi tanggal × M/C
-            unique_mcs = filtered_dates['M/C No.'].unique()
+            # Ambil semua kombinasi tanggal × M/C No.
+            unique_mcs = filtered_df['M/C No.'].unique()
             full_index = pd.MultiIndex.from_product([daily_range, unique_mcs], names=['Date', 'M/C No.'])
 
-            # Hitung jumlah per hari & M/C
+            # Hitung jumlah per hari & M/C No.
             daily_amount_mc = (
-                filtered_dates.groupby(['Date', 'M/C No.'])['Total Amount']
-                .sum()
-                .reindex(full_index, fill_value=0)  # Pastikan semua kombinasi ada
-                .reset_index()
-                .sort_values('Date')
+            filtered_df.groupby(['Date', 'M/C No.'])['Total Amount']
+            .sum()
+            .reindex(full_index, fill_value=0)
+            .reset_index()
+            .sort_values('Date')
             )
-        else:
-            daily_amount_mc = pd.DataFrame()
 
-        # Buat grafik
+            # Daftar warna berbeda (gunakan plotly qualitative palette)
+            color_palette = px.colors.qualitative.Plotly
+            color_map = {mc: color_palette[i % len(color_palette)] for i, mc in enumerate(unique_mcs)}
 
-        fig2 = go.Figure()
-        for mc in daily_amount_mc['M/C No.'].unique():
-            df_mc = daily_amount_mc[daily_amount_mc['M/C No.'] == mc]
-            fig2.add_trace(go.Scatter(
+            fig2 = go.Figure()
+            for i, mc in enumerate(unique_mcs):
+                df_mc = daily_amount_mc[daily_amount_mc['M/C No.'] == mc]
+                fig2.add_trace(go.Scatter(
                 x=df_mc['Date'],
                 y=df_mc['Total Amount'],
                 mode='lines+markers',
-                name=mc
+                name=str(mc),
+                line=dict(color=color_map[mc])
             ))
 
-        fig2.update_layout(
+            fig2.update_layout(
             title="Chart Amount [IDR] by Daily Data (M/C No.)",
             xaxis=dict(
                 title="Date",
                 tickformat="%d %b %Y",
-                tickangle=45
+                tickangle=45,
+                tickmode='array',
+                tickvals=daily_range,
+                ticktext=[d.strftime('%d %b') for d in daily_range],
+                range=[min_date, max_date]
             ),
             yaxis=dict(
                 title="Total Amount [IDR]",
@@ -659,9 +656,11 @@ if uploaded_file:
                 x=1
             ),
             margin=dict(t=60, b=80)
-        )
+            )
 
-        st.plotly_chart(fig2, use_container_width=True)
+            st.plotly_chart(fig2, use_container_width=True)
+        else:
+            st.info("Tidak ada data untuk ditampilkan pada grafik harian.")
 
 #endregion Grafik Line Harian by M/C No.
 
