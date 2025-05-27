@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 from io import BytesIO
 import base64
 import os
+import re
 
 #STart to commit 23May2025 to GitHub
 # ---- PAGE CONFIGURATION ----
@@ -14,14 +15,14 @@ import os
 st.set_page_config(page_title="dbSPT Dashboard", layout="wide")
 
 # ---- HIDE STREAMLIT STYLE ----
-hide_st_style = """
-<style>
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-header {visibility: hidden;}
-</style>
-"""
-st.markdown(hide_st_style, unsafe_allow_html=True)
+# hide_st_style = """
+# <style>
+# #MainMenu {visibility: hidden;}
+# footer {visibility: hidden;}
+# header {visibility: hidden;}
+# </style>
+# """
+# st.markdown(hide_st_style, unsafe_allow_html=True)
 
 # Fungsi untuk mengubah gambar menjadi base64
 def get_image_as_base64(image_path):
@@ -29,8 +30,6 @@ def get_image_as_base64(image_path):
 		return base64.b64encode(img_file.read()).decode()
      
 def show_footer():
-
-	
 	#Footer diisi foto ditaruh ditengah
 	st.markdown("---")
 
@@ -209,10 +208,10 @@ if uploaded_file:
 
 
         emma_L, emma_R = st.columns([1, 1])
-        with emma_L:
+        with emma_L:#Tampilkan Data Hasil Filtering
             with st.expander("📄 Tampilkan Data Hasil Filtering"):
                 st.dataframe(filtered_df.drop(columns=['Bulan-Tahun']), use_container_width=True)
-        with emma_R:
+        with emma_R:#Download Hasil Filter
             st.download_button(
                 label="📥 Download Hasil Filter",
                 data=excel_data,
@@ -221,12 +220,14 @@ if uploaded_file:
 
         st.markdown("---")
 
+        #---------------------------- HEADER -
+
         kol1, kol2, kol3    = st.columns(3)
         # Tampilkan total Qty dan Amount
-        with kol1:
+        with kol1:#judl summary data
             st.subheader("📈 SUMMARY DATA")
         
-        with kol2:
+        with kol2:#metric Total Amount
             total_amount = filtered_df['Total Amount'].sum()
             total_amount_str = f"{total_amount:,.0f}"
             st.markdown(f"""
@@ -235,7 +236,7 @@ if uploaded_file:
                 <div style='font-size:1.8rem; font-weight:bold;'>{total_amount_str}</div>
             """, unsafe_allow_html=True)
             
-        with kol3:
+        with kol3:#metric Total Qty
             total_qty = filtered_df['Qty'].sum()
             total_qty_str = f"{total_qty:,.0f}"
             st.markdown(f"""
@@ -266,8 +267,334 @@ if uploaded_file:
 
 #endregion Adaptasi Date
 
+#region pivot table Qty pcs dan Total Amount IDR per M/C No.
+        # Buat pivot table Qty pcs dan Total Amount IDR sebagai baris, kolom = M/C No., dengan kolom Total di setiap baris
+        pivot_qty = filtered_df.pivot_table(index=None, columns='M/C No.', values='Qty', aggfunc='sum', fill_value=0)
+        pivot_amt = filtered_df.pivot_table(index=None, columns='M/C No.', values='Total Amount', aggfunc='sum', fill_value=0)
+
+        # Ubah menjadi DataFrame dengan baris 'Qty [pcs]' dan 'Total Amount [IDR]'
+        pivot_df = pd.DataFrame([pivot_qty.values[0], pivot_amt.values[0]],
+            columns=pivot_qty.columns,
+            index=['Qty [pcs]', 'Total Amount [IDR]'])
+
+        # Urutkan kolom berdasarkan nilai Total Amount [IDR] dari besar ke kecil
+        sorted_cols = pivot_df.loc['Total Amount [IDR]'].sort_values(ascending=False).index.tolist()
+        pivot_df = pivot_df[sorted_cols]
+
+        # Tambahkan kolom Total di setiap baris
+        pivot_df['Total'] = pivot_df.sum(axis=1)
+
+        # Tampilkan pivot table di Streamlit dengan format angka dan rata kanan
+        def format_thousands(x):
+            try:
+                return f"{int(x):,}".replace(",", ".")
+            except:
+                return x
+
+        styled = pivot_df.style.format(format_thousands).set_properties(**{'text-align': 'right'}).set_table_styles(
+            [{'selector': 'th', 'props': [('text-align', 'right')]}]
+        )
+
+        with st.expander("📊 Pivot Table: Qty & Total Amount per M/C No."):
+            st.dataframe(styled, use_container_width=True)
+#endregion pivot table Qty pcs dan Total Amount IDR per M/C No.
+
+#region Grafik Bar Qty dan Amount by M/C No.
+
+        # Ambil data dari pivot_df (baris: Qty [pcs], Total Amount [IDR], kolom: M/C No.)
+        # Pastikan urutan mc_nos sama persis dengan urutan kolom di pivot_df (kecuali 'Total')
+        mc_nos = [col for col in pivot_df.columns if col != 'Total']
+
+        # Pastikan nama kolom tidak ada spasi ekstra
+        mc_nos = [str(mc).strip() for mc in mc_nos]
+
+        qty_values = pivot_df.loc['Qty [pcs]', mc_nos]
+        amount_values = pivot_df.loc['Total Amount [IDR]', mc_nos]
+
+        # Hapus M/C No. yang nilainya nol di kedua baris agar tidak ada spasi/jeda kosong di grafik
+        mask_nonzero = ((qty_values != 0) | (amount_values != 0)).values
+        mc_nos_filtered = [mc for i, mc in enumerate(mc_nos) if mask_nonzero[i]]
+        qty_values_filtered = qty_values[mc_nos_filtered]
+        amount_values_filtered = amount_values[mc_nos_filtered]
+
+        # Urutkan berdasarkan Total Amount [IDR] dari besar ke kecil
+        sorted_indices = amount_values_filtered.sort_values(ascending=False).index.tolist()
+        mc_nos_sorted = sorted_indices
+        qty_values_sorted = qty_values_filtered[mc_nos_sorted]
+        amount_values_sorted = amount_values_filtered[mc_nos_sorted]
+
+        fig_mesin = go.Figure()
+
+        # Bar Qty
+        fig_mesin.add_trace(go.Bar(
+            x=mc_nos_sorted,
+            y=qty_values_sorted,
+            name='Qty [pcs]',
+            yaxis='y1',
+            marker_color='#A08963', 
+            offsetgroup=0,
+            text=qty_values_sorted,
+            textposition='outside',
+            textfont=dict(color='#333333', size=12)
+        ))
+
+        # Bar Amount
+        fig_mesin.add_trace(go.Bar(
+            x=mc_nos_sorted,
+            y=amount_values_sorted,
+            name='Total Amount [IDR]',
+            yaxis='y2',
+            marker_color='#C9B194', 
+            offsetgroup=1,
+            text=[f"{int(val):,}" for val in amount_values_sorted],
+            textposition='outside',
+            textfont=dict(color='#333333', size=12)
+        ))
+
+        fig_mesin.update_layout(
+            title="Chart Qty [pcs] Vs Amount [IDR] by M/C No. (Filtered)",
+            xaxis=dict(
+            title="M/C No.",
+            categoryorder='array',
+            categoryarray=mc_nos_sorted,
+            tickmode='array',
+            tickvals=mc_nos_sorted,
+            ticktext=mc_nos_sorted
+            ),
+            yaxis=dict(
+            title="Qty [pcs]",
+            showgrid=False
+            ),
+            yaxis2=dict(
+            title="Total Amount [IDR]",
+            overlaying='y',
+            side='right',
+            showgrid=False
+            ),
+            barmode='group',
+            hovermode='x unified',
+            margin=dict(t=60, b=80),
+            legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.25,
+            xanchor="center",
+            x=0.5
+            )
+        )
+
+        fig_mesin.update_xaxes(
+            automargin=True,
+            tickangle=0,
+            tickmode='array',
+            tickvals=mc_nos_sorted,
+            ticktext=mc_nos_sorted
+        )
+
+        st.plotly_chart(fig_mesin, use_container_width=True)
+
+#endregion Grafik Bar Qty dan Amount by M/C No.
+
+#region pivot table Qty pcs dan Total Amount IDR per PIC
+        # Buat pivot table Qty pcs dan Total Amount IDR sebagai baris, kolom = PIC, dengan kolom Total di setiap baris
+        pivot_qty_PIC = filtered_df.pivot_table(index=None, columns='PIC', values='Qty', aggfunc='sum', fill_value=0)
+        pivot_amt_PIC = filtered_df.pivot_table(index=None, columns='PIC', values='Total Amount', aggfunc='sum', fill_value=0)
+
+        # Ubah menjadi DataFrame dengan baris 'Qty [pcs]' dan 'Total Amount [IDR]'
+        pivot_df_PIC = pd.DataFrame([pivot_qty_PIC.values[0], pivot_amt_PIC.values[0]],
+            columns=pivot_qty_PIC.columns,
+            index=['Qty [pcs]', 'Total Amount [IDR]'])
+
+        # Urutkan kolom berdasarkan nilai Total Amount [IDR] dari besar ke kecil
+        sorted_cols = pivot_df_PIC.loc['Total Amount [IDR]'].sort_values(ascending=False).index.tolist()
+        pivot_df_PIC = pivot_df_PIC[sorted_cols]
+
+        # Tambahkan kolom Total di setiap baris
+        pivot_df_PIC['Total'] = pivot_df_PIC.sum(axis=1)
+
+        # Tampilkan pivot table di Streamlit dengan format angka dan rata kanan
+        def format_thousands(x):
+            try:
+                return f"{int(x):,}".replace(",", ".")
+            except:
+                return x
+
+        styled_PIC = pivot_df_PIC.style.format(format_thousands).set_properties(**{'text-align': 'right'}).set_table_styles(
+            [{'selector': 'th', 'props': [('text-align', 'right')]}]
+        )
+
+        with st.expander("📊 Pivot Table: Qty & Total Amount per PIC"):
+            st.dataframe(styled_PIC, use_container_width=True)
+#endregion pivot table Qty pcs dan Total Amount IDR per PIC
+
+#region Grafik Bar Qty dan Amount by PIC 
+        # Group data by PIC within the filtered date range
+        pic_summary = (
+            filtered_df.groupby('PIC')
+            .agg({'Qty': 'sum', 'Total Amount': 'sum'})
+            .reset_index()
+        )
+
+        fig3 = go.Figure()
+
+        # Bar Qty
+        fig3.add_trace(go.Bar(
+            x=pic_summary['PIC'],
+            y=pic_summary['Qty'],
+            name='Qty [pcs]',
+            yaxis='y1',
+            marker_color='#B6B09F',
+            offsetgroup=0,
+            text=pic_summary['Qty'],
+            textposition='outside',
+            textfont=dict(color='#333333', size=12)
+        ))
+
+        # Bar Amount
+        fig3.add_trace(go.Bar(
+            x=pic_summary['PIC'],
+            y=pic_summary['Total Amount'],
+            name='Total Amount [IDR]',
+            yaxis='y2',
+            marker_color='#EAE4D5',
+            offsetgroup=1,
+            text=[f"{int(val):,}" for val in pic_summary['Total Amount']],
+            textposition='outside',
+            textfont=dict(color='#333333', size=12)
+        ))
+
+        fig3.update_layout(
+            title="Chart Qty [pcs] Vs Amount [IDR] by PIC (Filtered)",
+            xaxis=dict(
+            title="PIC",
+            categoryorder='total descending'
+            ),
+            yaxis=dict(
+            title="Qty [pcs]",
+            showgrid=False
+            ),
+            yaxis2=dict(
+            title="Total Amount [IDR]",
+            overlaying='y',
+            side='right',
+            showgrid=False
+            ),
+            barmode='group',
+            hovermode='x unified',
+            margin=dict(t=60, b=80),
+            legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.25,
+            xanchor="center",
+            x=0.5
+            )
+        )
+
+        st.plotly_chart(fig3, use_container_width=True)
+#endregion Grafik Bar Qty dan Amount by PIC
+
+#region Grafik Bar Qty dan Amount by Month-Year 
+
+        # Buat grafik bar untuk Qty dan Total Amount dengan nilai di atas grafik
+
+        fig1 = go.Figure()
+
+        # Bar Qty
+        fig1.add_trace(go.Bar(
+            x=monthly_summary['Month-Year'],
+            y=monthly_summary['Qty'],
+            name='Qty [pcs]',
+            yaxis='y1',
+            marker_color='#7886C7',
+            offsetgroup=0,
+            text=monthly_summary['Qty'],
+            textposition='outside',
+            textfont=dict(color='#333333', size=12)
+        ))
+
+        # Bar Amount
+        fig1.add_trace(go.Bar(
+            x=monthly_summary['Month-Year'],
+            y=monthly_summary['Total Amount'],
+            name='Total Amount [IDR]',
+            yaxis='y2',
+            marker_color='#A9B5DF',
+            offsetgroup=1,
+            text=[f"{int(val):,}" for val in monthly_summary['Total Amount']],
+            textposition='outside',
+            textfont=dict(color='#333333', size=12)
+        ))
+
+        fig1.update_layout(
+            title="Chart Qty [pcs] Vs Amount [IDR] by Month-Year (Filtered)",
+            xaxis=dict(
+            title="Bulan-Tahun",
+            categoryorder='array',
+            categoryarray=monthly_summary['Month-Year'].tolist()
+            ),
+            yaxis=dict(
+            title="Qty [pcs]",
+            showgrid=False
+            ),
+            yaxis2=dict(
+            title="Total Amount [IDR]",
+            overlaying='y',
+            side='right',
+            showgrid=False
+            ),
+            barmode='group',
+            hovermode='x unified',
+            margin=dict(t=60, b=80),
+            legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.25,
+            xanchor="center",
+            x=0.5
+            )
+        )
+        #fig1 ditampilkan dalam kolom di bawah ini bersama pie chart
+#endregion Grafik Bar Qty dan Amount by Month-Year
+       
+
+#region Grafik Pie Chart by M/C No.
+        
+        # Buat pie chart untuk Total Amount by M/C No.
+        if not filtered_df.empty:
+
+            # Group by M/C dan jumlah Total Amount
+            pie_data = (
+            filtered_df.groupby('M/C No.')['Total Amount']
+            .sum()
+            .reset_index()
+            .sort_values('Total Amount', ascending=False)
+            )
+
+            # Buat Pie Chart
+            pie_fig = go.Figure(data=[go.Pie(
+            labels=pie_data['M/C No.'],
+            values=pie_data['Total Amount'],
+            hole=0.3,  # donut style
+            hoverinfo='label+percent+value',
+            textinfo='label+percent'
+            )])
+
+            pie_fig.update_layout(
+            title_text="Distribution of Total Amount by M/C No. (Pie Chart)",
+            margin=dict(t=60, b=40)
+            )
+
+        # --- Tampilkan 2 grafik dalam 2 kolom ---
+        col1, col2 = st.columns(2)
+        with col1:# bar chart
+            st.plotly_chart(fig1, use_container_width=True)
+        with col2:#pie chart
+            st.plotly_chart(pie_fig, use_container_width=True)
+#endregion Grafik Pie Harian by M/C No.
+
 #region Grafik Line Harian by M/C No.
-        # Grafik Line Harian by M/C No. ---
+        
         # Buat chart fig1
         # Filter data berdasarkan bulan-tahun
         if selected_bt:
@@ -337,159 +664,6 @@ if uploaded_file:
         st.plotly_chart(fig2, use_container_width=True)
 
 #endregion Grafik Line Harian by M/C No.
-
-#region Grafik Bar Qty dan Amount by Month-Year 
-
-        # Grafik Bar Qty dan Amount by Month-Year ---
-        # Buat grafik bar untuk Qty dan Total Amount
-
-        fig1 = go.Figure()
-
-        # Bar Qty
-        fig1.add_trace(go.Bar(
-            x=monthly_summary['Month-Year'],
-            y=monthly_summary['Qty'],
-            name='Qty [pcs]',
-            yaxis='y1',
-            marker_color='brown',
-            offsetgroup=0
-        ))
-
-        # Bar Amount
-        fig1.add_trace(go.Bar(
-            x=monthly_summary['Month-Year'],
-            y=monthly_summary['Total Amount'],
-            name='Total Amount [IDR]',
-            yaxis='y2',
-            marker_color='grey',
-            offsetgroup=1
-        ))
-
-        fig1.update_layout(
-            title="Chart Qty [pcs] Vs Amount [IDR] by Month-Year (Filtered)",
-            xaxis=dict(
-                title="Bulan-Tahun",
-                categoryorder='array',
-                categoryarray=monthly_summary['Month-Year'].tolist()
-            ),
-            yaxis=dict(
-                title="Qty [pcs]",
-                showgrid=False
-            ),
-            yaxis2=dict(
-                title="Total Amount [IDR]",
-                overlaying='y',
-                side='right',
-                showgrid=False
-            ),
-            barmode='group',
-            hovermode='x unified',
-            margin=dict(t=60, b=80),
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=-0.25,
-                xanchor="center",
-                x=0.5
-            )
-        )
-#endregion Grafik Bar Qty dan Amount by Month-Year
-
-        # Tampilkan grafik bar Qty dan Amount by Month-Year
-
-        # --- 2. Grafik Bar Qty dan Amount by PIC ---
-        # Group data by PIC within the filtered date range
-        pic_summary = (
-            filtered_df.groupby('PIC')
-            .agg({'Qty': 'sum', 'Total Amount': 'sum'})
-            .reset_index()
-        )
-
-        fig3 = go.Figure()
-
-        # Bar Qty
-        fig3.add_trace(go.Bar(
-            x=pic_summary['PIC'],
-            y=pic_summary['Qty'],
-            name='Qty [pcs]',
-            yaxis='y1',
-            marker_color='royalblue',
-            offsetgroup=0
-        ))
-
-        # Bar Amount
-        fig3.add_trace(go.Bar(
-            x=pic_summary['PIC'],
-            y=pic_summary['Total Amount'],
-            name='Total Amount [IDR]',
-            yaxis='y2',
-            marker_color='seagreen',
-            offsetgroup=1
-        ))
-
-        fig3.update_layout(
-            title="Chart Qty [pcs] Vs Amount [IDR] by PIC (Filtered)",
-            xaxis=dict(
-            title="PIC",
-            categoryorder='total descending'
-            ),
-            yaxis=dict(
-            title="Qty [pcs]",
-            showgrid=False
-            ),
-            yaxis2=dict(
-            title="Total Amount [IDR]",
-            overlaying='y',
-            side='right',
-            showgrid=False
-            ),
-            barmode='group',
-            hovermode='x unified',
-            margin=dict(t=60, b=80),
-            legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=-0.25,
-            xanchor="center",
-            x=0.5
-            )
-        )
-
-        st.plotly_chart(fig3, use_container_width=True)
-
-        # --- 3. Grafik Pie Chart by M/C No. ---
-        # Buat pie chart untuk Total Amount by M/C No.
-        if not filtered_df.empty:
-
-            # Group by M/C dan jumlah Total Amount
-            pie_data = (
-            filtered_df.groupby('M/C No.')['Total Amount']
-            .sum()
-            .reset_index()
-            .sort_values('Total Amount', ascending=False)
-            )
-
-            # Buat Pie Chart
-            pie_fig = go.Figure(data=[go.Pie(
-            labels=pie_data['M/C No.'],
-            values=pie_data['Total Amount'],
-            hole=0.3,  # donut style
-            hoverinfo='label+percent+value',
-            textinfo='label+percent'
-            )])
-
-            pie_fig.update_layout(
-            title_text="Distribution of Total Amount by M/C No. (Pie Chart)",
-            margin=dict(t=60, b=40)
-            )
-
-        # --- Tampilkan 2 grafik dalam 2 kolom ---
-        col1, col2 = st.columns(2)
-        with col1:
-            st.plotly_chart(fig1, use_container_width=True)
-        with col2:
-            st.plotly_chart(pie_fig, use_container_width=True)
-
 
     except ValueError:
         st.error("❌ Sheet 'USAGE' tidak ditemukan.")
