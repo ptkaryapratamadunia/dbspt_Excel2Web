@@ -736,7 +736,7 @@ if uploaded_file:
 
 #endregion Grafik Line Harian by M/C No.
 
-#region Pivot Table
+#region Pivot Table kolom: Part No., Spareparts/ Tools Name, M/C No., PIC, Qty (pcs), Total Amount (IDR)
         # Buat pivot table dengan kolom: Part No., Spareparts/ Tools Name, M/C No., PIC, Qty (pcs), Total Amount (IDR)
         pivot_table = (
             filtered_df.groupby(['Part No.', 'Spareparts/ Tools Name', 'M/C No.', 'PIC'], as_index=False)
@@ -782,7 +782,32 @@ if uploaded_file:
             st.dataframe(styled_pivot, use_container_width=True)
 #endregion Pivot Table
 
+#region Chart  Spareparts/ Tools Name Vs Total Amount (IDR)
+        # Buat grafik bar Spareparts/ Tools Name Vs Total Amount (IDR)
+        if not filtered_df.empty:
+            fig4 = px.bar(
+                filtered_df,
+                x='Spareparts/ Tools Name',
+                y='Total Amount',
+                color='Spareparts/ Tools Name',
+                title="Chart Spareparts/ Tools Name Vs Total Amount (IDR)",
+                labels={'Total Amount': 'Total Amount [IDR]'},
+                text='Total Amount'
+            )
 
+            fig4.update_layout(
+                xaxis_title="Spareparts/ Tools Name",
+                yaxis_title="Total Amount [IDR]",
+                xaxis_tickangle=-45,
+                margin=dict(t=60, b=80),
+                legend_title_text="Spareparts/ Tools Name"
+            )
+
+            st.plotly_chart(fig4, use_container_width=True)
+        else:
+            st.info("Tidak ada data untuk ditampilkan pada grafik Spareparts/ Tools Name.")
+
+#endregion Chart Spareparts/ Tools Name Vs Total Amount (IDR)
 
     except ValueError:
         st.error("❌ Sheet 'USAGE' tidak ditemukan.")
