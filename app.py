@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 from io import BytesIO
 import base64
 import os
-import re
+
 
 #STart to commit 23May2025 to GitHub
 # ---- PAGE CONFIGURATION ----
@@ -24,55 +24,13 @@ st.set_page_config(page_title="dbSPT Dashboard", layout="wide")
 # """
 # st.markdown(hide_st_style, unsafe_allow_html=True)
 
-# Fungsi untuk mengubah gambar menjadi base64
-def get_image_as_base64(image_path):
-	with open(image_path, "rb") as img_file:
-		return base64.b64encode(img_file.read()).decode()
-     
-def show_footer():
-	#Footer diisi foto ditaruh ditengah
-	st.markdown("---")
+# Login Page added 12May2025 20.08 WIb @home
+def login_page():
+	
+	kol1 ,kol3,kol5 = st.columns((1,1,1))
 
-
-	kaki_kiri,kaki_kiri2, kaki_tengah,kaki_kanan2, kaki_kanan=st.columns((2,2,1,2,2))
-
-	with kaki_kiri:
-		st.write("")
-
-	with kaki_kiri2:
-		st.write("")
-
-	with kaki_tengah:
-		# kontener_photo=st.container(border=True)
+	with kol1:
 		# Adjust the file path based on the current directory
-		current_dir = os.path.dirname(os.path.abspath(__file__))
-		e_WeYe = os.path.join(current_dir, 'eweye.png')
-		# Memuat gambar dan mengubahnya menjadi base64
-		# logo_KPD ='logoKPD.png'
-		image_base64 = get_image_as_base64(e_WeYe)
-		st.image(e_WeYe,"©️ 2024 - e-WeYe, All Rights Reserved")
-
-	with kaki_kanan2:
-		st.write("")
-
-	with kaki_kanan:
-		st.write("")
-
-# ---- APP TITLE ----
-
-kiri, kanan = st.columns([3, 2])
-with kiri:
-    st.markdown(
-        """
-        <h3 style='text-align: left; color: #333;'> 📊 dbSPT Dashboard</h1>
-        <h5 style='text-align: left; color: #666;'>Spareparts & Tools Summary Report</h2>
-        """,
-        unsafe_allow_html=True
-    )
-with kanan: # Menampilkan logo di kolom kanan
-        
-        # Menggunakan os.path untuk mendapatkan path gambar        
-        # Adjust the file path based on the current directory
 		current_dir = os.path.dirname(os.path.abspath(__file__))
 		logo_KPD = os.path.join(current_dir, 'logoKPD.png')
 		# Memuat gambar dan mengubahnya menjadi base64
@@ -114,17 +72,123 @@ with kanan: # Menampilkan logo di kolom kanan
 			}}
 			</style>
 			<div class="container">
-				<h2 style="color:blue;">PT. KARYAPRATAMA DUNIA</h2>
 				<img src='data:image/png;base64,{image_base64}'/>
+				<h2 style="color:blue;">PT. KARYAPRATAMA DUNIA</h2>
 			</div>
 			""",
 			unsafe_allow_html=True
 		)
+		st.markdown("<div style='text-align: center; font-weight: bold;color:orange;'>QUALITY DEPARTMENT</div>", unsafe_allow_html=True)
+	with kol3:
+		# Form login
+		st.info("Please log in to access the application.")
+		st.markdown('---')
+		st.markdown('<div class="login-container"><div class="login-form">', unsafe_allow_html=True)
+		username = st.text_input("Username", key="username")
+		password = st.text_input("Password", type="password", key="password")
+		if st.button("Login"):
+			if username == "kpd" and password == "kpd080808":
+				st.session_state["logged_in"] = True
+				# Reload halaman dengan mengatur ulang parameter URL
+				st.query_params.clear()
+			else:
+				st.error("Invalid username or password!")
 
-		st.markdown("---")
+		st.markdown('</div></div>', unsafe_allow_html=True)
+		st.markdown('---')
+	with kol5:
+		st.markdown("""<h2 style="color:green;margin-top:-10px;margin-bottom:0px;"> 📊 QUALITY DASHBOARD </h2>""", unsafe_allow_html=True)
+		
+		st.markdown("<div style='text-align: center; font-weight: bold;color:blue;'>Quality Performance Plating Line</div>", unsafe_allow_html=True)
+	
+# Fungsi untuk mengubah gambar menjadi base64
+def get_image_as_base64(image_path):
+	with open(image_path, "rb") as img_file:
+		return base64.b64encode(img_file.read()).decode()
+     
+def show_footer():
+	#Footer diisi foto ditaruh ditengah
+	st.markdown("---")
 
+
+	kaki_kiri,kaki_kiri2, kaki_tengah,kaki_kanan2, kaki_kanan=st.columns((2,2,1,2,2))
+
+	with kaki_kiri:
+		st.write("")
+
+	with kaki_kiri2:
+		st.write("")
+
+	with kaki_tengah:
+		# kontener_photo=st.container(border=True)
+		# Adjust the file path based on the current directory
+		current_dir = os.path.dirname(os.path.abspath(__file__))
+		e_WeYe = os.path.join(current_dir, 'eweye.png')
+		# Memuat gambar dan mengubahnya menjadi base64
+		# logo_KPD ='logoKPD.png'
+		image_base64 = get_image_as_base64(e_WeYe)
+		st.image(e_WeYe,"©️ 2024 - e-WeYe")
+
+	with kaki_kanan2:
+		st.write("")
+
+	with kaki_kanan:
+		st.write("")
+
+# ---- APP TITLE ----
+
+kiri, kanan = st.columns([3, 2])
+with kiri:
+    st.markdown(
+        """
+        <h3 style='text-align: left; color: #333;'> 📊 dbSPT Dashboard</h1>
+        <h5 style='text-align: left; color: #666;'>Spareparts & Tools Summary Report</h2>
+        """,
+        unsafe_allow_html=True
+    )
+with kanan: # Menampilkan logo di kolom kanan
+        
+    # Menggunakan os.path untuk mendapatkan path gambar        
+    # Adjust the file path based on the current directory
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    logo_KPD = os.path.join(current_dir, 'logoKPD.png')
+    # Memuat gambar dan mengubahnya menjadi base64
+    # logo_KPD ='logoKPD.png'
+    image_base64 = get_image_as_base64(logo_KPD)
+    
+    # Menampilkan logo di kanan dan teks di sebelah kirinya dengan gap 8px
+    st.markdown(
+        f"""
+        <style>
+        .logo-row {{
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        }}
+        .logo-row img {{
+        width: 50px;
+        margin: 0;
+        }}
+        .logo-row span {{
+        color: blue;
+        font-size: 20px;
+        font-weight: bold;
+        margin: 0;
+        }}
+        </style>
+        <div class="logo-row">
+        <span>PT. KARYAPRATAMA DUNIA</span>
+        <img src='data:image/png;base64,{image_base64}'/>
+        </div>
+        <h5 style='text-align: right; color: #666;'>Quality Department</h5>
+        """,
+        unsafe_allow_html=True
+    )
+    
     
 # ---- APP DESCRIPTION ----
+st.markdown("---")
 header_col1, header_col2,header_col3 = st.columns([1,1,1])
 with header_col1:#about this app
     st.markdown(
