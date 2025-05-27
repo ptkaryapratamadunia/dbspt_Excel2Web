@@ -15,14 +15,14 @@ import re
 st.set_page_config(page_title="dbSPT Dashboard", layout="wide")
 
 # ---- HIDE STREAMLIT STYLE ----
-hide_st_style = """
-<style>
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-header {visibility: hidden;}
-</style>
-"""
-st.markdown(hide_st_style, unsafe_allow_html=True)
+# hide_st_style = """
+# <style>
+# #MainMenu {visibility: hidden;}
+# footer {visibility: hidden;}
+# header {visibility: hidden;}
+# </style>
+# """
+# st.markdown(hide_st_style, unsafe_allow_html=True)
 
 # Fungsi untuk mengubah gambar menjadi base64
 def get_image_as_base64(image_path):
@@ -125,8 +125,8 @@ with kanan: # Menampilkan logo di kolom kanan
 
     
 # ---- APP DESCRIPTION ----
-header_col1, header_col2 = st.columns([1, 1])
-with header_col1:
+header_col1, header_col2,header_col3 = st.columns([1,1,1])
+with header_col1:#about this app
     st.markdown(
         """
         <h5 style='font-size:0.9rem;text-align: left; color: #666;'>Aplikasi ini digunakan untuk menganalisis data spareparts dan tools. Data bersumber dari File Excel yang diinput secara rutin oleh team produksi Stamping Line PT. KARYAPRATAMA DUNIA</h5>
@@ -136,7 +136,12 @@ with header_col1:
                 <div style='font-size:0.8rem; color:gray;'>Sumber data excel hanya bisa diuload dari Aplikasi dbSPT.xlsm yang ada di PT. KARYAPRATAMA DUNIA</div>
             """, unsafe_allow_html=True)
     
-with header_col2:
+with header_col2:#link G-Drive
+                  
+            #Added 18Mar2025 to make this apps more user friendly and globally accessible
+			st.warning(f"Jika sumber file yang ingin dibersihkan berada di folder Google Drive, unduh/download lewat link berikut ini: [Link Folder](https://drive.google.com/drive/folders/1LCTVG_9ZZY_GUBtOM0Ycb-dWTgidA2_3?usp=sharing)  |  Download file Excel (.xls, .xlsx atau .csv) dari folder tersebut ke perangkat Anda, lalu unggah/upload file lewat menu Browse di sebelah kanan ➡️:")
+                  
+with header_col3:#file uploader
     st.markdown(
         """
         <h5 style='font-size:0.9rem;text-align: left; color: #666;'>Silahkan unggah file Excel (.xlsx / .xlsm) </h5>
