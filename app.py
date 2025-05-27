@@ -750,9 +750,36 @@ if uploaded_file:
         # Urutkan berdasarkan Total Amount (IDR) terbesar
         pivot_table = pivot_table.sort_values('Total Amount (IDR)', ascending=False)
 
+        # Hitung total Qty dan Total Amount
+        total_qty = pivot_table['Qty (pcs)'].sum()
+        total_amount = pivot_table['Total Amount (IDR)'].sum()
+
+        # Tambahkan baris total di akhir
+        total_row = {
+            'Part No.': 'TOTAL',
+            'Spareparts/ Tools Name': '',
+            'M/C No.': '',
+            'PIC': '',
+            'Qty (pcs)': total_qty,
+            'Total Amount (IDR)': total_amount
+        }
+        pivot_table = pd.concat([pivot_table, pd.DataFrame([total_row])], ignore_index=True)
+
+        # Format angka dengan pemisah ribuan koma
+        def format_thousands(x):
+            try:
+                return f"{int(x):,}"
+            except:
+                return x
+
+        styled_pivot = pivot_table.style.format({
+            'Qty (pcs)': format_thousands,
+            'Total Amount (IDR)': format_thousands
+        })
+
         # Tampilkan pivot table di Streamlit
-        with st.expander("📊 Pivot Table: Part No., Spareparts/ Tools Name, M/C No., PIC, Qty (pcs), Total Amount (IDR)"):
-            st.dataframe(pivot_table, use_container_width=True)
+        with st.expander("📊 Table: Part No., Spareparts/ Tools Name, M/C No., PIC, Qty (pcs), Total Amount (IDR)"):
+            st.dataframe(styled_pivot, use_container_width=True)
 #endregion Pivot Table
 
 
