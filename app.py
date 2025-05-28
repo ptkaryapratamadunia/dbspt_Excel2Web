@@ -15,14 +15,14 @@ import os
 st.set_page_config(page_title="dbSPT Dashboard", layout="wide")
 
 # ---- HIDE STREAMLIT STYLE ----
-# hide_st_style = """
-# <style>
-# #MainMenu {visibility: hidden;}
-# footer {visibility: hidden;}
-# header {visibility: hidden;}
-# </style>
-# """
-# st.markdown(hide_st_style, unsafe_allow_html=True)
+hide_st_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_st_style, unsafe_allow_html=True)
 
 # Login Page added 12May2025 20.08 WIb @home
 def login_page():
@@ -138,7 +138,7 @@ def show_footer():
 # ---- APP TITLE ----
 
 kiri, kanan = st.columns([3, 2])
-with kiri:
+with kiri:#judul halaman dbSPT Dashboard
     st.markdown(
         """
         <h3 style='text-align: left; color: #333;'> 📊 dbSPT Dashboard</h1>
@@ -191,30 +191,29 @@ with kanan: # Menampilkan logo di kolom kanan
 st.markdown("---")
 header_col1, header_col2,header_col3 = st.columns([1,1,1])
 with header_col1:#about this app
+    st.markdown("---")
     st.markdown(
         """
-        <h5 style='font-size:0.9rem;text-align: left; color: #666;'>Aplikasi ini digunakan untuk menganalisis data spareparts dan tools. Data bersumber dari File Excel yang diinput secara rutin oleh team produksi Stamping Line PT. KARYAPRATAMA DUNIA</h5>
-       
         <div style='padding:1rem; border:1px solid #ddd; border-radius:1rem; text-align:center;'>
-                <div style='font-size:0.9rem; color:brown; font-weight:bold'>Disclaimer: </div>
-                <div style='font-size:0.8rem; color:gray;'>Sumber data excel hanya bisa diuload dari Aplikasi dbSPT.xlsm yang ada di PT. KARYAPRATAMA DUNIA</div>
+                <div style='font-size:1rem; color:brown; font-weight:bold'>About & Disclaimer </div>
+                <div style='font-size:0.9rem; color:gray;'>Aplikasi ini digunakan untuk menganalisis data pemakaian spareparts dan tools dari Line Stamping di PT. KARYAPRATAMA DUNIA. Sumber data excel hanya bisa diunggah dari Aplikasi dbSPT.xlsm
             """, unsafe_allow_html=True)
     
 with header_col2:#link G-Drive
-                  
-            #Added 18Mar2025 to make this apps more user friendly and globally accessible
-			st.warning(f"Jika Anda belum memiliki file, silakan unduh dari 📂 [Link Folder ini](https://drive.google.com/drive/folders/1LCTVG_9ZZY_GUBtOM0Ycb-dWTgidA2_3?usp=sharing), lalu unggah/upload file lewat menu Browse Files di sebelah kanan ➡️:")
-                  
-with header_col3:#file uploader
+    st.markdown("---")
     st.markdown(
         """
-        <h5 style='font-size:0.9rem;text-align: left; color: #666;'>Silahkan unggah file Excel (.xlsx / .xlsm) </h5>
-        """,
-        unsafe_allow_html=True
-    )
+        <div style='padding:1rem; border:1px solid #ddd; border-radius:1rem; text-align:center;'>
+                <div style='font-size:1rem; color:brown; font-weight:bold'>Hints</div>
+                <div style='font-size:0.9rem; color:gray;'>Jika Anda belum memiliki file, silakan unduh dari 📂 Link Folder yang ada di kolom sebelah, lalu unggah/upload file lewat menu Browse Files atau drag/ seret Files ke area Uploader di bawahnya...</div>
+            """, unsafe_allow_html=True)              
+                
+with header_col3:#file uploader
+    
+    #Added 18Mar2025 to make this apps more user friendly and globally accessible
+    st.info(f" 📂 [Link Folder](https://drive.google.com/drive/folders/1LCTVG_9ZZY_GUBtOM0Ycb-dWTgidA2_3?usp=sharing) untuk mengunduh File")
 
-
-    uploaded_file = st.file_uploader("Klik tombol 'Browse files' untuk mengunggah file", type=["xlsx", "xlsm"])
+    uploaded_file = st.file_uploader("", type=["xlsx", "xlsm"])
 
 st.markdown("---")
 
@@ -292,7 +291,7 @@ if uploaded_file:
 
         st.markdown("---")
 
-        #---------------------------- HEADER -
+#region---------------------------- HEADER -
 
         kol1, kol2, kol3    = st.columns(3)
         # Tampilkan total Qty dan Amount
@@ -322,6 +321,8 @@ if uploaded_file:
 
         st.write("📈 Visualisasi Data")
         st.write("Grafik interaktif untuk analisis data spareparts dan tools.")
+
+#endregion Header
 
 #region Adaptasi Date
        # Konversi kolom Date
